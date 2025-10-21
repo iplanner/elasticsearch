@@ -6,6 +6,8 @@ FROM docker.elastic.co/elasticsearch/elasticsearch:7.16.1
 # ----------------------------------------------------
 USER root
 
+ENV ES_JAVA_OPTS="-Xms512m -Xmx512m"
+
 # 1. Installiere openssh-server und lösche Paketlisten
 RUN apt-get update && apt-get install -y openssh-server \
     && rm -rf /var/lib/apt/lists/*

@@ -2,12 +2,10 @@
 set -e
 
 echo "Starting SSH service in the background..."
-# Starte den SSH-Daemon. Er sollte im Hintergrund laufen, damit der Hauptprozess 
-# (Elasticsearch) im Vordergrund laufen kann.
-/usr/sbin/sshd
+# Starte sshd mit '-D' (Debug/Foreground mode) und leite die Ausgabe um.
+/usr/sbin/sshd -D > /dev/null 2>&1 & 
+# WICHTIG: Die Umleitung kann helfen, dass SSH nicht in die Logs von ES schreibt,
+# wenn Render die Log-Streams zusammenführt.
 
 echo "Starting Elasticsearch service..."
-# Führt den ursprünglichen Elasticsearch-Entrypoint aus,
-# welcher wiederum die CMD (eswrapper) aufruft.
-# Der "$@" Teil übergibt alle Argumente (wie die CMD) an das Skript.
 exec /usr/local/bin/docker-entrypoint.sh "$@"
