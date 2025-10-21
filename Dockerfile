@@ -1,5 +1,5 @@
 # Basis-Image (Elasticsearch 7.16.1, wie angegeben)
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.16.1@sha256:1000eae211ce9e3fcd1850928eea4ee45a0a517315
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.16.1@sha256:1000eae211ce9e3fcd1850928eea4ee45a0a5173154df954f7b4c7a093b849f8
 
 # Wechsle zu root für Installation und Konfiguration
 USER root
