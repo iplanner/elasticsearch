@@ -15,35 +15,42 @@ RUN apt-get update && \
 RUN mkdir -p /run/sshd && \
     chmod 755 /run/sshd
 
-# Erstelle SSH-Verzeichnis für den Elasticsearch-Benutzer (1000)
+# Erstelle /etc/ssh und generiere Host-Schlüssel
+RUN mkdir -p /etc/ssh && \
+    ssh-keygen -A && \
+    chown -R root:root /etc/ssh && \
+    chmod 600 /etc/ssh/ssh_host_*_key
+
+# Erstelle SSH-Verzeichnis für den Benutzer elasticsearch (1000)
 RUN mkdir -p /home/elasticsearch/.ssh && \
     chown 1000:0 /home/elasticsearch/.ssh && \
     chmod 0700 /home/elasticsearch/.ssh
 
-# Kopiere öffentlichen SSH-Schlüssel (optional, Render fügt ihn automatisch hinzu)
-# COPY --chown=1000:0 config/authorized_keys /home/elasticsearch/.ssh/authorized_keys
-# RUN chmod 0600 /home/elasticsearch/.ssh/authorized_keys
-
-# Setze Shell für Benutzer elasticsearch (1000) auf /bin/bash
+# Setze Shell für Benutzer elasticsearch auf /bin/bash (wie von Render gefordert)
 RUN usermod -s /bin/bash elasticsearch
 
-# Kopiere Elasticsearch-Konfig (wie im Original)
+# Kopiere Elasticsearch-Konfig
 COPY --chown=1000:0 config/elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
 
-# Berechtigungen für Keystore (wie im Original)
+# Berechtigungen für Keystore
 RUN chmod g+ws /usr/share/elasticsearch/config
 
-# Erstelle SSH-Host-Schlüssel
-RUN ssh-keygen -A
-
-# Erstelle ein Skript, das SSH und Elasticsearch startet
+# Erstelle ein Start-Skript
 RUN echo '#!/bin/bash\n\
-/usr/sbin/sshd && \n\
-/usr/local/bin/docker-entrypoint.sh' > /start.sh && \
+# Prüfe und erstelle SSH-Host-Schlüssel, falls nicht vorhanden\n\
+if [ ! -f /etc/ssh/ssh_host_ed25519_key ]; then\n\
+  ssh-keygen -A\n\
+  chown root:root /etc/ssh/ssh_host_*_key\n\
+  chmod 600 /etc/ssh/ssh_host_*_key\n\
+fi\n\
+# Starte SSH-Dienst\n\
+/usr/sbin/sshd\n\
+# Starte Elasticsearch als Benutzer elasticsearch\n\
+exec gosu elasticsearch /usr/local/bin/docker-entrypoint.sh' > /start.sh && \
 chmod +x /start.sh
 
-# Wechsle zurück zum Elasticsearch-Benutzer
-USER 1000:0
+# Wechsle zurück zum Nicht-Root-Benutzer (wie von Render gefordert)
+USER elasticsearch
 
 # Starte SSH und Elasticsearch
 CMD ["/start.sh"]
