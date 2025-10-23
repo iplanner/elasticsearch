@@ -1,18 +1,22 @@
 cluster.name: "elastic"
+node.name: "node-1"
 
-# Render leitet nur den PORT-Env-Wert durch → hierauf binden
+# An alle Interfaces binden
 network.host: 0.0.0.0
-http.port: ${PORT:9200}
 
-# Einzelknoten-Betrieb (keine Transport-Ports nötig)
+# Ein-Knoten-Betrieb
 discovery.type: single-node
 
-# In Containern besser kein mlock
-bootstrap.memory_lock: false
-
-# ——— Option A: offen (nur für Tests; nicht empfohlen) ———
-# xpack.security.enabled: false
-
-# ——— Option B: mit Passwort-Auth (empfohlen) ———
+# Render terminiert TLS am Edge; intern HTTP zum Container
+# (wenn du End-to-End-TLS willst, unten https aktivieren)
 xpack.security.enabled: true
-# xpack.security.http.ssl.enabled: false   # TLS übernimmt Render-Proxy
+
+# Optional: HTTP/Transport-Ports explizit (Standard bleibt 9200/9300)
+# http.port: 9200
+# transport.port: 9300
+
+# Wenn du später E2E-TLS willst:
+# xpack.security.http.ssl.enabled: true
+# xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/http.key
+# xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/http.crt
+# xpack.security.http.ssl.certificate_authorities: ["/usr/share/elasticsearch/config/certs/ca.crt"]
