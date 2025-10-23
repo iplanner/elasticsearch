@@ -16,7 +16,8 @@ xpack.security.enabled: true
 # transport.port: 9300
 
 # Wenn du später E2E-TLS willst:
-# xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.enabled: true
+xpack.security.authc.api_key.enabled: true
 # xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/http.key
 # xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/http.crt
 # xpack.security.http.ssl.certificate_authorities: ["/usr/share/elasticsearch/config/certs/ca.crt"]
