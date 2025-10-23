@@ -1,36 +1,20 @@
-# Das offizielle Elasticsearch Docker Image
+# Offizielles Elasticsearch-Image
 FROM docker.elastic.co/elasticsearch/elasticsearch:7.16.1
 
-# ----------------------------------------------------
-# VORBEREITUNG ALS ROOT
-# ----------------------------------------------------
+# Als root nur Dateirechte anpassen – kein SSH, kein eigener Entry
 USER root
 
-# JVM-Speicher (WICHTIG gegen Abstürze)
+# JVM-Heap konservativ (an Render-Instanz anpassen)
 ENV ES_JAVA_OPTS="-Xms512m -Xmx512m"
 
-# 1. Installiere openssh-server und net-tools
-# `net-tools` für zukünftige Shell-Diagnosen
-RUN apt-get update && apt-get install -y openssh-server net-tools \
-    && rm -rf /var/lib/apt/lists/*
+# (Optional) Verzeichnisrechte fixen, falls Render-Disk gemountet wird
+RUN mkdir -p /usr/share/elasticsearch/data \
+ && chown -R 1000:0 /usr/share/elasticsearch
 
-# 2. Erzeuge Host-Schlüssel und konfiguriere SSH
-RUN ssh-keygen -A \
-    && echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-
-# 3. Erstelle das .ssh Verzeichnis für den Elastic-Benutzer
-RUN mkdir -p /usr/share/elasticsearch/.ssh \
-    && chown 1000:0 /usr/share/elasticsearch/.ssh \
-    && chmod 0700 /usr/share/elasticsearch/.ssh
-
-# ----------------------------------------------------
-# EIGENE KONFIGURATION UND RÜCKKEHR ZUM NORMALEN START
-# ----------------------------------------------------
-
-# Kopiere die Elasticsearch-Konfiguration
+# Eigene ES-Konfiguration kopieren
 COPY --chown=1000:0 config/elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
-RUN chmod g+ws /usr/share/elasticsearch/config
 
-# WICHTIG: Zurück zum Nicht-Root-Benutzer wechseln.
-# Die ENTRYPOINT und CMD des Basis-Images bleiben erhalten.
+# Zurück zu elasticsearch-User (1000)
 USER 1000:0
+
+# Kein ENTRYPOINT/CMD nötig – das Basis-Image startet ES korrekt

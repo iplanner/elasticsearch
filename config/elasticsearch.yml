@@ -1,6 +1,18 @@
 cluster.name: "elastic"
-# bind to all network interfaces
+
+# Render leitet nur den PORT-Env-Wert durch → hierauf binden
 network.host: 0.0.0.0
-discovery.type: single-node 
-# In elasticsearch.yml
+http.port: ${PORT:9200}
+
+# Einzelknoten-Betrieb (keine Transport-Ports nötig)
+discovery.type: single-node
+
+# In Containern besser kein mlock
 bootstrap.memory_lock: false
+
+# ——— Option A: offen (nur für Tests; nicht empfohlen) ———
+# xpack.security.enabled: false
+
+# ——— Option B: mit Passwort-Auth (empfohlen) ———
+xpack.security.enabled: true
+# xpack.security.http.ssl.enabled: false   # TLS übernimmt Render-Proxy
