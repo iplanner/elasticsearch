@@ -1,23 +1,20 @@
 cluster.name: "elastic"
 node.name: "node-1"
 
-# An alle Interfaces binden
+# An alle Interfaces binden (Render routet extern -> intern)
 network.host: 0.0.0.0
 
-# Ein-Knoten-Betrieb
+# Single-Node
 discovery.type: single-node
 
-# Render terminiert TLS am Edge; intern HTTP zum Container
-# (wenn du End-to-End-TLS willst, unten https aktivieren)
+# Security JA, aber KEIN HTTPS im Container (TLS macht Render am Edge)
 xpack.security.enabled: true
+xpack.security.http.ssl.enabled: false
+xpack.security.transport.ssl.enabled: false
 
-# Optional: HTTP/Transport-Ports explizit (Standard bleibt 9200/9300)
-# http.port: 9200
-# transport.port: 9300
-
-# Wenn du später E2E-TLS willst:
-xpack.security.http.ssl.enabled: true
+# API-Keys aktivieren
 xpack.security.authc.api_key.enabled: true
-# xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/http.key
-# xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/http.crt
-# xpack.security.http.ssl.certificate_authorities: ["/usr/share/elasticsearch/config/certs/ca.crt"]
+
+# (Keine Zertifikats-Pfade setzen, nichts weiter nötig)
+# http.port: 9200   # optional, Standard
+# transport.port: 9300  # optional, Standard
